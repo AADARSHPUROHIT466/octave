@@ -1411,7 +1411,7 @@ Array<T, Alloc>::assign (const Array<octave::idx_vector>& ia,
                  // Bounds check before accessing rhdv
                  if (j < rhdvl)
                    {
-                     bool rhs_is_empty = (rhdv[j] == 0);  // safe access
+                     bool rhs_is_empty = (rhdv.xelem(j) == 0);  // raw, efficient access
                      j++;  // increment index after use
                      rhsempty = rhsempty || rhs_is_empty;
                    }
