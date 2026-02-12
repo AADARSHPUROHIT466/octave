@@ -1391,41 +1391,25 @@ Array<T, Alloc>::assign (const Array<octave::idx_vector>& ia,
             }
         }
       else
-         { 
-            bool lhsempty = false;
-             bool rhsempty = false;
-           
-             dim_vector lhs_dv = dim_vector::alloc (ial);
-           
-             j = 0;  // Reset j before reusing it
-           
-             for (int i = 0; i < ial; i++)
-               {
-                 // Compute lhs dimension length
-                 octave_idx_type l = ia(i).length (rdv(i));
-                 lhs_dv(i) = l;
-           
-                 // Check if lhs dimension is empty
-                 lhsempty = lhsempty || (l == 0);
-           
-                 // Bounds check before accessing rhdv
-                 if (j < rhdvl)
-                   {
-                     bool rhs_is_empty = (rhdv.xelem(j) == 0);  // raw, efficient access
-                     j++;  // increment index after use
-                     rhsempty = rhsempty || rhs_is_empty;
-                   }
-               }
-           
-             // This part is fine as-is
-             if (! lhsempty || ! rhsempty)
-               {
-                 lhs_dv.chop_trailing_singletons ();
-                 octave::err_nonconformant ("=", lhs_dv, rhdv);
-              }
-           }
-
-    }
+        {
+          // dimension mismatch, unless LHS and RHS both empty
+          bool lhsempty, rhsempty;
+          lhsempty = rhsempty = false;
+          dim_vector lhs_dv = dim_vector::alloc (ial);
+          for (int i = 0; i < ial; i++)
+            {
+              octave_idx_type l = ia(i).length (rdv(i));
+              lhs_dv(i) = l;
+              lhsempty = lhsempty || (l == 0);
+              rhsempty = rhsempty || (rhdv(j++) == 0);
+            }
+          if (! lhsempty || ! rhsempty)
+            {
+              lhs_dv.chop_trailing_singletons ();
+              octave::err_nonconformant ("=", lhs_dv, rhdv);
+            }
+        }        
+    }  
 }
 
 template <typename T, typename Alloc>
